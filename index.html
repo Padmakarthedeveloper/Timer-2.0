@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Session Timer</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; padding: 20px; background-color: #121214; color: white ; }
+    button { margin: 10px; padding: 10px 20px; border-radius: 12px; border-color: transparent;}
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; border-radius: 20px;
+        border-collapse: separate; /* this is crucial for border-radius to work */
+        border-spacing: 0;
+        border-radius: 12px;
+        overflow: hidden; /* makes the radius clip the inner content */ }
+
+    th, td { border: 1px solid #1b1b1b; padding: 8px; background-color: #1a1a1e;}
+    th { background-color: #2e2e33; }
+    canvas { max-width: 600px; margin: 20px auto; }
+    .timer{
+       font-size: 30px;
+        color: white;
+        background-color: #2e2e33;
+        margin: 0 auto;
+        width: fit-content;
+        padding: 10px;
+        border-radius: 5px;
+    }
+    button {
+  transition: transform 0.1s ease;
+ }
+
+    button:active {
+  transform: scale(0.95);
+     }
+    
+  </style>
+</head>
+<body>
+  <audio id="dingSound" src="ding.mp3" preload="auto"></audio>
+  <h1>Session Timer</h1>
+  <div style="align-items: center; text-align: center;">
+    <div style="padding: 10px;">Total Time <br> <div id="totalTime" class="timer">00:00:00</div></div>
+    <div style="padding: 10px;">Questions Done <span id="qDone" style="color: antiquewhite; background-color: #2e2e33; border-radius: 5px; padding: 10px;">0</span> </div>
+    <div style="padding: 10px;" > Current Question <br> <div id="questionTime" class="timer">00:00:00</div></div>
+  </div>
+  <div>
+    <button id="startBtn" style="background-color: rgb(49, 159, 67); color: #ffffff;">Start</button>
+    <button id="pauseBtn" style="background-color: rgb(255, 226, 83); color: #2e2e33;">Pause</button>
+    <button id="stopBtn" style="background-color: rgb(255, 106, 83); color: #ffffff;">Stop</button>
+    <button id="doneBtn" style="background-color: rgb(83, 149, 255); color: #ffffff;">Question Done <span style="color: rgb(232, 232, 232);">[Space]</span></button>
+  </div>
+
+  <canvas id="timePerQuestionChart" style="width: 100%;"></canvas>
+
+  <table id="sessionTable">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Date</th>
+        <th>Start Time</th>
+        <th>End Time</th>
+        <th>Questions Done</th>
+        <th>Total Time</th>
+        <th>Avg Time/Q</th>
+        <th>Max Time</th>
+        <th>Min Time</th>
+        <th style="color: white; background-color: #c13d3f;">Delete</th>
+      </tr>
+    </thead>
+    <tbody style="border-radius: 5px;"></tbody>
+  </table>
+
+  <script>
+    let sessionStart, sessionEnd, intervalTotal, intervalQuestion;
+    let totalSeconds = 0, questionSeconds = 0;
+    let questionTimes = [], sessionName = "", isRunning = false;
+
+    const totalDisplay = document.getElementById("totalTime");
+    const questionDisplay = document.getElementById("questionTime");
+    const doneBtn = document.getElementById("doneBtn");
+
+    function formatTime(sec) {
+      const h = String(Math.floor(sec / 3600)).padStart(2, '0');
+      const m = String(Math.floor((sec % 3600) / 60)).padStart(2, '0');
+      const s = String(sec % 60).padStart(2, '0');
+      return `${h}:${m}:${s}`;
+    }
+
+    function updateDisplay() {
+      totalDisplay.textContent = formatTime(totalSeconds);
+      questionDisplay.textContent = formatTime(questionSeconds);
+    }
+
+    function startTimer() {
+      if (isRunning) return;
+      isRunning = true;
+      sessionStart = new Date();
+      intervalTotal = setInterval(() => {
+        totalSeconds++;
+        updateDisplay();
+      }, 1000);
+      intervalQuestion = setInterval(() => {
+        questionSeconds++;
+        updateDisplay();
+      }, 1000);
+    }
+
+    function pauseTimer() {
+      clearInterval(intervalTotal);
+      clearInterval(intervalQuestion);
+      isRunning = false;
+    }
+
+    function stopTimer() {
+      pauseTimer();
+      sessionEnd = new Date();
+      sessionName = prompt("Enter session name:");
+      if (!sessionName) return;
+      const avg = questionTimes.reduce((a, b) => a + b, 0) / questionTimes.length;
+      const max = Math.max(...questionTimes);
+      const min = Math.min(...questionTimes);
+      const data = {
+        name: sessionName,
+        date: new Date().toLocaleDateString(),
+        start: sessionStart.toLocaleTimeString(),
+        end: sessionEnd.toLocaleTimeString(),
+        questions: questionTimes.length/2,
+        total: formatTime(totalSeconds),
+        avg: formatTime(Math.round(avg)),
+        max: formatTime(max),
+        min: formatTime(min),
+        questionTimes
+      };
+      const sessions = JSON.parse(localStorage.getItem("sessionData")) || [];
+      sessions.push(data);
+      localStorage.setItem("sessionData", JSON.stringify(sessions));
+      renderTable();
+      renderChart();
+      reset();
+    }
+
+    function reset() {
+      totalSeconds = 0;
+      questionSeconds = 0;
+      questionTimes = [];
+      document.getElementById("qDone").textContent = 0
+      updateDisplay();
+    }
+
+    function questionDone() {
+      if (!isRunning) return;
+      questionTimes.push(questionSeconds);
+      questionSeconds = 0;
+      document.getElementById("dingSound").play();
+      document.getElementById("doneBtn").click();
+      document.getElementById("qDone").textContent = questionTimes.length/2;
+    }
+
+    document.getElementById("startBtn").addEventListener("click", startTimer);
+    document.getElementById("pauseBtn").addEventListener("click", pauseTimer);
+    document.getElementById("stopBtn").addEventListener("click", stopTimer);
+    doneBtn.addEventListener("click", questionDone);
+
+    document.body.addEventListener("keydown", e => {
+      if (e.code === "Space") {
+        e.preventDefault();
+        questionDone();
+      }
+    });
+
+    function renderTable() {
+      const tbody = document.querySelector("#sessionTable tbody");
+      tbody.innerHTML = "";
+      const sessions = JSON.parse(localStorage.getItem("sessionData")) || [];
+      sessions.forEach((s, i) => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${s.name}</td>
+          <td>${s.date}</td>
+          <td>${s.start}</td>
+          <td>${s.end}</td>
+          <td>${s.questions}</td>
+          <td>${s.total}</td>
+          <td>${s.avg}</td>
+          <td>${s.max}</td>
+          <td>${s.min}</td>
+          <td><button style="color: white; background-color: #c13d3f;" onclick="deleteSession(${i})">Delete</button></td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    function deleteSession(index) {
+      const sessions = JSON.parse(localStorage.getItem("sessionData")) || [];
+      sessions.splice(index, 1);
+      localStorage.setItem("sessionData", JSON.stringify(sessions));
+      renderTable();
+      renderChart();
+    }
+
+    function renderChart() {
+      const ctx = document.getElementById('timePerQuestionChart').getContext('2d');
+      const sessions = JSON.parse(localStorage.getItem("sessionData")) || [];
+      const labels = sessions.map(s => s.name);
+      const data = sessions.map(s => s.avg.split(":").reduce((acc, v, i) => acc + (+v) * [3600, 60, 1][i], 0));
+      if (window.myChart) window.myChart.destroy();
+      window.myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [{
+            label: 'Avg Time per Question (in seconds)',
+            data,
+            backgroundColor: 'rgba(54, 162, 235, 0.5)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+    }
+
+    renderTable();
+    renderChart();
+  </script>
+</body>
+</html>
