@@ -71,6 +71,9 @@
     <tbody style="border-radius: 5px;"></tbody>
   </table>
 
+  <h3 id="creds">
+    made by: <a href="https://instagram.com/padmakarrrr" style="color: gold;">@Padmakarrrr</a><button id="hide"> hide </button>
+  </h3>
   <script>
     let sessionStart, sessionEnd, intervalTotal, intervalQuestion;
     let totalSeconds = 0, questionSeconds = 0;
@@ -160,6 +163,11 @@
     document.getElementById("pauseBtn").addEventListener("click", pauseTimer);
     document.getElementById("stopBtn").addEventListener("click", stopTimer);
     doneBtn.addEventListener("click", questionDone);
+
+    function hide(){
+        document.getElementById("creds").remove()
+    }
+    document.getElementById("hide").addEventListener("click", hide)
 
     document.body.addEventListener("keydown", e => {
       if (e.code === "Space") {
