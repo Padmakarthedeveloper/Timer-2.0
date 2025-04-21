@@ -125,7 +125,7 @@
         date: new Date().toLocaleDateString(),
         start: sessionStart.toLocaleTimeString(),
         end: sessionEnd.toLocaleTimeString(),
-        questions: questionTimes.length/2,
+        questions: questionTimes.length,
         total: formatTime(totalSeconds),
         avg: formatTime(Math.round(avg)),
         max: formatTime(max),
@@ -153,8 +153,7 @@
       questionTimes.push(questionSeconds);
       questionSeconds = 0;
       document.getElementById("dingSound").play();
-      document.getElementById("doneBtn").click();
-      document.getElementById("qDone").textContent = questionTimes.length/2;
+      document.getElementById("qDone").textContent = questionTimes.length;
     }
 
     document.getElementById("startBtn").addEventListener("click", startTimer);
