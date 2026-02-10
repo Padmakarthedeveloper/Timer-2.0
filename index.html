@@ -5,55 +5,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Session Timer</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    body { font-family: Arial, sans-serif; text-align: center; padding: 20px; background-color: #121214; color: white ; }
-    button { margin: 10px; padding: 10px 20px; border-radius: 12px; border-color: transparent;}
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; border-radius: 20px;
-        border-collapse: separate; /* this is crucial for border-radius to work */
-        border-spacing: 0;
-        border-radius: 12px;
-        overflow: hidden; /* makes the radius clip the inner content */ }
-
-    th, td { border: 1px solid #1b1b1b; padding: 8px; background-color: #1a1a1e;}
-    th { background-color: #2e2e33; }
-    canvas { max-width: 600px; margin: 20px auto; }
-    .timer{
-       font-size: 30px;
-        color: white;
-        background-color: #2e2e33;
-        margin: 0 auto;
-        width: fit-content;
-        padding: 10px;
-        border-radius: 5px;
-    }
-    button {
-  transition: transform 0.1s ease;
- }
-
-    button:active {
-  transform: scale(0.95);
-     }
-    
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <audio id="dingSound" src="ding.mp3" preload="auto"></audio>
-  <h1>Session Timer</h1>
+  <h1 class="heading">Session Timer</h1>
 
-
-  <div class="timer-display">
+<div class="timer-display">
    <span>BITSAT</span> <p> <span class="timer" id="JEEtimer"></span></p>  <br>
 </div>
   <div style="align-items: center; text-align: center;">
-    <div style="padding: 10px;">Total Time <br> <div id="totalTime" class="timer">00:00:00</div></div>
-    <div style="padding: 10px;">Questions Done <span id="qDone" style="color: antiquewhite; background-color: #2e2e33; border-radius: 5px; padding: 10px;">0</span> </div>
-    <div style="padding: 10px;" > Current Question <br> <div id="questionTime" class="timer">00:00:00</div></div>
+    <div class="txt" >Total Time <br> <div id="totalTime" class="timer">00:00:00</div></div>
+    <div class="txt" > Current Question <br> <div id="questionTime" class="timer">00:00:00</div></div>
+    <div class="txt">Questions Done <br><br> <span id="qDone">0</span> </div>
   </div>
   <div>
-    <button id="startBtn" style="background-color: rgb(49, 159, 67); color: #ffffff;">Start</button>
-    <button id="pauseBtn" style="background-color: rgb(255, 226, 83); color: #2e2e33;">Pause</button>
-    <button id="stopBtn" style="background-color: rgb(255, 106, 83); color: #ffffff;">Stop</button>
-    <button id="doneBtn" style="background-color: rgb(83, 149, 255); color: #ffffff;">Question Done <span style="color: rgb(232, 232, 232);">[Space]</span></button>
+    <button id="startBtn" class="btn" style="background-color: rgba(172, 255, 47, 0.36);">Start</button>
+    <button id="pauseBtn" class="btn" style="background-color: rgba(255, 234, 0, 0.488);">Pause</button>
+    <button id="stopBtn" class="btn"style="background-color: rgba(255, 8, 0, 0.419);">Stop</button>
+    <button id="doneBtn" class="btn">Question Done <span style="color: rgb(232, 232, 232);">[Space]</span></button>
   </div>
 
   <canvas id="timePerQuestionChart" style="width: 100%;"></canvas>
