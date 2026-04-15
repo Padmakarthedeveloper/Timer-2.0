@@ -223,14 +223,12 @@
       if (timeRemaining < 0) {
         document.getElementById("JEEtimer").innerHTML = "Time's up!";
       }
-    }
-
-    setInterval(updateTimer, 1000);
     };
 
+    updateTimer();
+    setInterval(updateTimer, 1000);
     renderTable();
     renderChart();
-    updateTimer();
   </script>
 </body>
 </html>
